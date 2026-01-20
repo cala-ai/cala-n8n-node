@@ -1,0 +1,70 @@
+{
+  "name": "n8n-nodes-cala",
+  "version": "0.2.0",
+  "description": "n8n nodes for Cala AI knowledge search",
+  "keywords": [
+    "n8n-community-node-package",
+    "n8n",
+    "cala",
+    "knowledge",
+    "search"
+  ],
+  "license": "MIT",
+  "author": {
+    "name": "Cala AI",
+    "email": "support@cala.ai",
+    "url": "https://cala.ai"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://gitlab.com/cala-ai/cala-n8n.git"
+  },
+  "homepage": "https://gitlab.com/cala-ai/cala-n8n",
+  "bugs": {
+    "url": "https://gitlab.com/cala-ai/cala-n8n/-/issues"
+  },
+  "scripts": {
+    "build": "tsc && gulp build:icons",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "eslint nodes credentials",
+    "prepublishOnly": "npm run build"
+  },
+  "files": [
+    "dist",
+    "LICENSE",
+    "README.md"
+  ],
+  "n8n": {
+    "n8nNodesApiVersion": 1,
+    "credentials": [
+      "dist/credentials/CalaApi.credentials.js"
+    ],
+    "nodes": [
+      "dist/nodes/Cala/Cala.node.js"
+    ]
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.2",
+    "@types/jest": "^30.0.0",
+    "@types/node": "^20.10.0",
+    "eslint": "^9.39.2",
+    "gulp": "^5.0.0",
+    "jest": "^30.2.0",
+    "n8n-workflow": "^1.0.0",
+    "ts-jest": "^29.4.6",
+    "typescript": "^5.3.0",
+    "typescript-eslint": "^8.53.1"
+  },
+  "peerDependencies": {
+    "n8n-workflow": "*"
+  },
+  "engines": {
+    "node": ">=22",
+    "pnpm": ">=10"
+  },
+  "volta": {
+    "node": "22.13.1"
+  },
+  "packageManager": "pnpm@10.2.1"
+}

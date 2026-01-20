@@ -1,0 +1,35 @@
+stages:
+  - test
+  - publish
+
+cache:
+  key: ${CI_COMMIT_REF_SLUG}
+  paths:
+    - .pnpm-store
+
+variables:
+  PNPM_STORE_PATH: .pnpm-store
+
+before_script:
+  - corepack enable
+  - corepack prepare pnpm@10.2.1 --activate
+
+test:
+  stage: test
+  image: node:22.13.1
+  script:
+    - pnpm install --frozen-lockfile
+    - pnpm run lint
+    - pnpm run build
+    - pnpm test
+
+publish:
+  stage: publish
+  image: node:22.13.1
+  rules:
+    - if: '$CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+$/ && $NPM_TOKEN'
+  script:
+    - echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > .npmrc
+    - pnpm install --frozen-lockfile
+    - npx @n8n/scan-community-package n8n-nodes-cala
+    - pnpm publish --access public
