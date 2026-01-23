@@ -12,8 +12,7 @@ describe('Cala Node', () => {
     const createExecutionContext = ({
       baseUrl = 'https://api.cala.ai/',
       apiKey = 'test-key',
-      resource = 'knowledge',
-      operation = 'search',
+      operation = 'knowledgeSearch',
       query = 'What is Cala?',
       response = { content: 'ok' },
     } = {}): IExecuteFunctions & { helpers: { httpRequest: jest.Mock } } => {
@@ -22,9 +21,6 @@ describe('Cala Node', () => {
       return {
         getInputData: jest.fn(() => [{ json: { input: 'one' } }]),
         getNodeParameter: jest.fn((name: string, _index: number) => {
-          if (name === 'resource') {
-            return resource;
-          }
           if (name === 'operation') {
             return operation;
           }
@@ -86,8 +82,7 @@ describe('Cala Node', () => {
       const context = {
         getInputData: jest.fn(() => queries.map(q => ({ json: { query: q } }))),
         getNodeParameter: jest.fn((name: string, index: number) => {
-          if (name === 'resource') return 'knowledge';
-          if (name === 'operation') return 'search';
+          if (name === 'operation') return 'knowledgeSearch';
           if (name === 'query') return queries[index];
           throw new Error(`Unexpected parameter: ${name}`);
         }),
@@ -110,8 +105,7 @@ describe('Cala Node', () => {
       const context = {
         getInputData: jest.fn(() => [{ json: {} }]),
         getNodeParameter: jest.fn((name: string) => {
-          if (name === 'resource') return 'knowledge';
-          if (name === 'operation') return 'search';
+          if (name === 'operation') return 'knowledgeSearch';
           if (name === 'query') return 'test query';
           throw new Error(`Unexpected parameter: ${name}`);
         }),
@@ -122,14 +116,13 @@ describe('Cala Node', () => {
       await expect(node.execute.call(context)).rejects.toThrow('API Error: 500 Internal Server Error');
     });
 
-    it('should return empty array for unsupported resource/operation', async () => {
+    it('should return empty array for unsupported operation', async () => {
       const httpRequest = jest.fn();
 
       const context = {
         getInputData: jest.fn(() => [{ json: {} }]),
         getNodeParameter: jest.fn((name: string) => {
-          if (name === 'resource') return 'unsupported';
-          if (name === 'operation') return 'unknown';
+          if (name === 'operation') return 'unsupported';
           throw new Error(`Unexpected parameter: ${name}`);
         }),
         getCredentials: jest.fn(async () => ({ baseUrl: 'https://api.cala.ai', apiKey: 'test-key' })),

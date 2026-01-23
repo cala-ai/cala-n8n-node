@@ -12,7 +12,7 @@ export class Cala implements INodeType {
 		icon: 'file:cala.svg',
 		group: ['transform'],
 		version: 1,
-		subtitle: '={{$parameter["operation"] + ": " + $parameter["resource"]}}',
+		subtitle: '={{$parameter["operation"]}}',
 		description: 'Search verified knowledge with Cala AI',
 		defaults: {
 			name: 'Cala',
@@ -27,37 +27,19 @@ export class Cala implements INodeType {
 		],
 		properties: [
 			{
-				displayName: 'Resource',
-				name: 'resource',
-				type: 'options',
-				noDataExpression: true,
-				options: [
-					{
-						name: 'Knowledge',
-						value: 'knowledge',
-					},
-				],
-				default: 'knowledge',
-			},
-			{
 				displayName: 'Operation',
 				name: 'operation',
 				type: 'options',
 				noDataExpression: true,
-				displayOptions: {
-					show: {
-						resource: ['knowledge'],
-					},
-				},
 				options: [
 					{
-						name: 'Search',
-						value: 'search',
+						name: 'Knowledge Search',
+						value: 'knowledgeSearch',
 						description: 'Search verified knowledge',
 						action: 'Search verified knowledge',
 					},
 				],
-				default: 'search',
+				default: 'knowledgeSearch',
 			},
 			{
 				displayName: 'Query',
@@ -66,8 +48,7 @@ export class Cala implements INodeType {
 				required: true,
 				displayOptions: {
 					show: {
-						resource: ['knowledge'],
-						operation: ['search'],
+						operation: ['knowledgeSearch'],
 					},
 				},
 				default: '',
@@ -86,10 +67,9 @@ export class Cala implements INodeType {
 		const apiKey = credentials.apiKey as string | undefined;
 
 		for (let i = 0; i < items.length; i++) {
-			const resource = this.getNodeParameter('resource', i) as string;
 			const operation = this.getNodeParameter('operation', i) as string;
 
-			if (resource === 'knowledge' && operation === 'search') {
+			if (operation === 'knowledgeSearch') {
 				const query = this.getNodeParameter('query', i) as string;
 
 				const headers: Record<string, string> = {
