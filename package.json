@@ -17,11 +17,11 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://gitlab.com/cala-ai/cala-n8n.git"
+    "url": "https://github.com/cala-ai/cala-n8n-node.git"
   },
-  "homepage": "https://gitlab.com/cala-ai/cala-n8n",
+  "homepage": "https://github.com/cala-ai/cala-n8n-node",
   "bugs": {
-    "url": "https://gitlab.com/cala-ai/cala-n8n/-/issues"
+    "url": "https://github.com/cala-ai/cala-n8n-node/issues"
   },
   "scripts": {
     "build": "tsc && gulp build:icons",
