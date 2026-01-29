@@ -13,7 +13,7 @@ export class Cala implements INodeType {
 		group: ['transform'],
 		version: 1,
 		subtitle: 'Knowledge Search',
-		description: 'Search verified knowledge with Cala AI',
+		description: 'Search trusted knowledge with Cala AI',
 		defaults: {
 			name: 'Cala',
 		},

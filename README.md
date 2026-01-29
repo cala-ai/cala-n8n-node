@@ -28,7 +28,7 @@ You need a Cala API key to use this node:
 
 ## Endpoint
 
-The node provides access to the **Knowledge Search** endpoint, which searches verified knowledge using natural language queries.
+The node provides access to the **Knowledge Search** endpoint, which searches trusted knowledge using natural language queries.
 
 ### Example
 
