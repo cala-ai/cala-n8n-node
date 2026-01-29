@@ -1,6 +1,6 @@
 {
   "name": "n8n-nodes-cala",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "description": "n8n nodes for Cala AI knowledge search",
   "keywords": [
     "n8n-community-node-package",
