@@ -1,0 +1,12 @@
+node_modules/
+dist/
+*.log
+.DS_Store
+
+# IDE and local tool configs
+.idea/
+.vscode/
+.*/
+
+# Lock files - only use pnpm-lock.yaml
+package-lock.json
