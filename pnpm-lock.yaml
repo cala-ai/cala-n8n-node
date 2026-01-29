@@ -7,6 +7,13 @@ settings:
 importers:
 
   .:
+    dependencies:
+      n8n-nodes-cala:
+        specifier: ^0.2.1
+        version: 0.2.1(n8n-workflow@1.120.6)
+      n8n-workflow:
+        specifier: '*'
+        version: 1.120.6
     devDependencies:
       '@eslint/js':
         specifier: ^9.39.2
@@ -26,9 +33,6 @@ importers:
       jest:
         specifier: ^30.2.0
         version: 30.2.0(@types/node@20.19.30)
-      n8n-workflow:
-        specifier: ^1.0.0
-        version: 1.120.6
       ts-jest:
         specifier: ^29.4.6
         version: 29.4.6(@babel/core@7.28.6)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.28.6))(jest-util@30.2.0)(jest@30.2.0(@types/node@20.19.30))(typescript@5.9.3)
@@ -1738,6 +1742,12 @@ packages:
   mute-stdout@2.0.0:
     resolution: {integrity: sha512-32GSKM3Wyc8dg/p39lWPKYu8zci9mJFzV1Np9Of0ZEpe6Fhssn/FbI7ywAMd40uX+p3ZKh3T5EeCFv81qS3HmQ==}
     engines: {node: '>= 10.13.0'}
+
+  n8n-nodes-cala@0.2.1:
+    resolution: {integrity: sha512-w8343g7iF/gBPiLb4wtPGj1mPLuMk6r1pG/HS6VXEnmDsShx/psOigMMBPgRcZP2s0BsKqbYrwK/bDWExczQhw==}
+    engines: {node: '>=22', pnpm: '>=10'}
+    peerDependencies:
+      n8n-workflow: '*'
 
   n8n-workflow@1.120.6:
     resolution: {integrity: sha512-0Kvr3nOigGSBlz63OiVpFYAljjcKGiTYokYumGeSY0qbab3ptrnHGzOHfYfScdfa9HLzgry8XOgJluFyyob35g==}
@@ -4389,6 +4399,10 @@ snapshots:
   ms@2.1.3: {}
 
   mute-stdout@2.0.0: {}
+
+  n8n-nodes-cala@0.2.1(n8n-workflow@1.120.6):
+    dependencies:
+      n8n-workflow: 1.120.6
 
   n8n-workflow@1.120.6:
     dependencies:

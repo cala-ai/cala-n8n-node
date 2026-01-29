@@ -26,13 +26,9 @@ You need a Cala API key to use this node:
 3. In n8n, create new credentials of type **Cala API**
 4. Enter your API key
 
-## Operations
+## Endpoint
 
-### Knowledge
-
-| Operation | Description |
-|-----------|-------------|
-| **Search** | Search verified knowledge using natural language queries |
+The node provides access to the **Knowledge Search** endpoint, which searches verified knowledge using natural language queries.
 
 ### Example
 
@@ -72,50 +68,6 @@ You need a Cala API key to use this node:
 - [Cala Documentation](https://docs.cala.ai)
 - [Cala Console](https://console.cala.ai)
 - [n8n Community Nodes Documentation](https://docs.n8n.io/integrations/community-nodes/)
-
-## Development
-
-### Requirements
-
-- Node.js >= 22
-- pnpm >= 10
-
-### Project Structure
-
-```text
-cala-n8n/
-├── credentials/
-│   └── CalaApi.credentials.ts   # API credentials definition
-├── nodes/
-│   └── Cala/
-│       ├── Cala.node.ts         # Main node logic
-│       └── cala.svg             # Node icon
-├── dist/                        # Compiled output
-├── Makefile                     # Development commands
-├── package.json
-├── tsconfig.json
-└── gulpfile.js
-```
-
-### Quick Start
-
-```bash
-make start    # Build + start n8n at http://localhost:5678
-make stop     # Stop n8n
-```
-
-### Commands
-
-| Command | Description |
-| ------- | ----------- |
-| `make install` | Install dependencies |
-| `make build` | Build the project |
-| `make dev` | Development mode (watch) |
-| `make start` | Start n8n locally |
-| `make stop` | Stop n8n |
-| `make publish` | Publish to npm |
-| `make verify` | Run n8n linter |
-| `make clean` | Remove build artifacts |
 
 ## License
 

@@ -10,9 +10,7 @@ describe('Cala Node', () => {
 
   describe('execute', () => {
     const createExecutionContext = ({
-      baseUrl = 'https://api.cala.ai/',
       apiKey = 'test-key',
-      operation = 'knowledgeSearch',
       query = 'What is Cala?',
       response = { content: 'ok' },
     } = {}): IExecuteFunctions & { helpers: { httpRequest: jest.Mock } } => {
@@ -20,23 +18,20 @@ describe('Cala Node', () => {
 
       return {
         getInputData: jest.fn(() => [{ json: { input: 'one' } }]),
-        getNodeParameter: jest.fn((name: string, _index: number) => {
-          if (name === 'operation') {
-            return operation;
-          }
+        getNodeParameter: jest.fn((name: string) => {
           if (name === 'query') {
             return query;
           }
           throw new Error(`Unexpected parameter name: ${name}`);
         }),
-        getCredentials: jest.fn(async () => ({ baseUrl, apiKey })),
+        getCredentials: jest.fn(async () => ({ apiKey })),
         helpers: {
           httpRequest,
         },
       } as unknown as IExecuteFunctions & { helpers: { httpRequest: jest.Mock } };
     };
 
-    it('should call Cala API with normalized base URL', async () => {
+    it('should call Cala API with correct URL', async () => {
       const context = createExecutionContext();
       const result = await node.execute.call(context);
 
@@ -82,11 +77,10 @@ describe('Cala Node', () => {
       const context = {
         getInputData: jest.fn(() => queries.map(q => ({ json: { query: q } }))),
         getNodeParameter: jest.fn((name: string, index: number) => {
-          if (name === 'operation') return 'knowledgeSearch';
           if (name === 'query') return queries[index];
           throw new Error(`Unexpected parameter: ${name}`);
         }),
-        getCredentials: jest.fn(async () => ({ baseUrl: 'https://api.cala.ai', apiKey: 'test-key' })),
+        getCredentials: jest.fn(async () => ({ apiKey: 'test-key' })),
         helpers: { httpRequest },
       } as unknown as IExecuteFunctions;
 
@@ -105,34 +99,14 @@ describe('Cala Node', () => {
       const context = {
         getInputData: jest.fn(() => [{ json: {} }]),
         getNodeParameter: jest.fn((name: string) => {
-          if (name === 'operation') return 'knowledgeSearch';
           if (name === 'query') return 'test query';
           throw new Error(`Unexpected parameter: ${name}`);
         }),
-        getCredentials: jest.fn(async () => ({ baseUrl: 'https://api.cala.ai', apiKey: 'test-key' })),
+        getCredentials: jest.fn(async () => ({ apiKey: 'test-key' })),
         helpers: { httpRequest },
       } as unknown as IExecuteFunctions;
 
       await expect(node.execute.call(context)).rejects.toThrow('API Error: 500 Internal Server Error');
-    });
-
-    it('should return empty array for unsupported operation', async () => {
-      const httpRequest = jest.fn();
-
-      const context = {
-        getInputData: jest.fn(() => [{ json: {} }]),
-        getNodeParameter: jest.fn((name: string) => {
-          if (name === 'operation') return 'unsupported';
-          throw new Error(`Unexpected parameter: ${name}`);
-        }),
-        getCredentials: jest.fn(async () => ({ baseUrl: 'https://api.cala.ai', apiKey: 'test-key' })),
-        helpers: { httpRequest },
-      } as unknown as IExecuteFunctions;
-
-      const result = await node.execute.call(context);
-
-      expect(httpRequest).not.toHaveBeenCalled();
-      expect(result).toEqual([[]]);
     });
   });
 });

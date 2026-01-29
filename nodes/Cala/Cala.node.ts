@@ -12,7 +12,7 @@ export class Cala implements INodeType {
 		icon: 'file:cala.svg',
 		group: ['transform'],
 		version: 1,
-		subtitle: '={{$parameter["operation"]}}',
+		subtitle: 'Knowledge Search',
 		description: 'Search verified knowledge with Cala AI',
 		defaults: {
 			name: 'Cala',
@@ -27,33 +27,13 @@ export class Cala implements INodeType {
 		],
 		properties: [
 			{
-				displayName: 'Operation',
-				name: 'operation',
-				type: 'options',
-				noDataExpression: true,
-				options: [
-					{
-						name: 'Knowledge Search',
-						value: 'knowledgeSearch',
-						description: 'Search verified knowledge',
-						action: 'Search verified knowledge',
-					},
-				],
-				default: 'knowledgeSearch',
-			},
-			{
 				displayName: 'Query',
 				name: 'query',
 				type: 'string',
 				required: true,
-				displayOptions: {
-					show: {
-						operation: ['knowledgeSearch'],
-					},
-				},
 				default: '',
-				placeholder: 'What is the refund policy?',
-				description: 'The search query to find verified knowledge',
+				placeholder: "i.e. What were Toyota's total sales in 2023?",
+				description: 'The search query to find knowledge',
 			},
 		],
 	};
@@ -63,38 +43,33 @@ export class Cala implements INodeType {
 		const returnData: INodeExecutionData[] = [];
 
 		const credentials = await this.getCredentials('calaApi');
-		const baseUrl = (credentials.baseUrl as string).replace(/\/$/, '');
 		const apiKey = credentials.apiKey as string | undefined;
 
 		for (let i = 0; i < items.length; i++) {
-			const operation = this.getNodeParameter('operation', i) as string;
+			const query = this.getNodeParameter('query', i) as string;
 
-			if (operation === 'knowledgeSearch') {
-				const query = this.getNodeParameter('query', i) as string;
+			const headers: Record<string, string> = {
+				'Content-Type': 'application/json',
+			};
 
-				const headers: Record<string, string> = {
-					'Content-Type': 'application/json',
-				};
-
-				if (apiKey) {
-					headers['X-API-KEY'] = apiKey;
-				}
-
-				const response = await this.helpers.httpRequest({
-					method: 'POST',
-					url: `${baseUrl}/v1/knowledge/search`,
-					headers,
-					body: {
-						input: query,
-					},
-					json: true,
-				});
-
-				returnData.push({
-					json: response,
-					pairedItem: { item: i },
-				});
+			if (apiKey) {
+				headers['X-API-KEY'] = apiKey;
 			}
+
+			const response = await this.helpers.httpRequest({
+				method: 'POST',
+				url: 'https://api.cala.ai/v1/knowledge/search',
+				headers,
+				body: {
+					input: query,
+				},
+				json: true,
+			});
+
+			returnData.push({
+				json: response,
+				pairedItem: { item: i },
+			});
 		}
 
 		return [returnData];

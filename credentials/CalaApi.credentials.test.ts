@@ -27,10 +27,8 @@ describe('CalaApi Credentials', () => {
     expect(apiKeyProp?.typeOptions?.password).toBe(true);
   });
 
-  it('should have base URL property with default value', () => {
-    const baseUrlProp = credentials.properties.find(p => p.name === 'baseUrl');
-    expect(baseUrlProp).toBeDefined();
-    expect(baseUrlProp?.type).toBe('string');
-    expect(baseUrlProp?.default).toBe('https://api.cala.ai');
+  it('should only have API key property', () => {
+    expect(credentials.properties).toHaveLength(1);
+    expect(credentials.properties[0].name).toBe('apiKey');
   });
 });

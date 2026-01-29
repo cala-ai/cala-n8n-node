@@ -19,13 +19,5 @@ export class CalaApi implements ICredentialType {
 			required: true,
 			description: 'Your Cala API key',
 		},
-		{
-			displayName: 'Base URL',
-			name: 'baseUrl',
-			type: 'string',
-			default: 'https://api.cala.ai',
-			required: true,
-			description: 'The base URL of the Cala API',
-		},
 	];
 }

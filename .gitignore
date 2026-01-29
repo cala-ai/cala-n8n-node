@@ -7,3 +7,6 @@ dist/
 .idea/
 .vscode/
 .*/
+
+# Lock files - only use pnpm-lock.yaml
+package-lock.json
