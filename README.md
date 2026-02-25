@@ -26,13 +26,22 @@ You need a Cala API key to use this node:
 3. In n8n, create new credentials of type **Cala API**
 4. Enter your API key
 
-## Endpoint
+## Operations
 
-The node provides access to the **Knowledge Search** endpoint, which searches trusted knowledge using natural language queries.
+The node exposes a **Knowledge** resource with four operations:
 
-### Example
+| Operation | Description |
+|-----------|-------------|
+| **Search** | Answer natural language questions with sourced, researched content |
+| **Query** | Filter entities by attributes using structured dot-notation syntax |
+| **Search Entities** | Find entities by name with fuzzy matching |
+| **Get Entity** | Get the full profile of an entity by its numeric ID |
 
-**Input:** "How many students were enrolled at MIT in 2024?"
+### Search
+
+Ask a natural language question and get back a researched answer with sources.
+
+**Input:** `"How many students were enrolled at MIT in 2024?"`
 
 **Output:**
 ```json
@@ -47,7 +56,7 @@ The node provides access to the **Knowledge Search** endpoint, which searches tr
   "context": [
     {
       "id": "a1b2c3d4-5678-90ab-cdef-123456789abc",
-      "content": "In 2024, the Massachusetts Institute of Technology enrolled approximately 11,800 students: 4,600 undergraduates and 7,200 graduate students.",
+      "content": "In 2024, the Massachusetts Institute of Technology enrolled approximately 11,800 students.",
       "origins": [
         {
           "source": { "name": "MIT", "url": "https://mit.edu" },
@@ -57,11 +66,26 @@ The node provides access to the **Knowledge Search** endpoint, which searches tr
     }
   ],
   "entities": [
-    { "id": 1, "name": "MIT", "entity_type": "ORGANIZATION" },
-    { "id": 2, "name": "Massachusetts Institute of Technology", "entity_type": "ORGANIZATION" }
+    { "id": 1, "name": "MIT", "entity_type": "ORGANIZATION" }
   ]
 }
 ```
+
+### Query
+
+Filter entities by attributes using dot-notation syntax.
+
+**Input:** `"startups.location=Spain.funding>10M.funding<=50M"`
+
+### Search Entities
+
+Find entities by name (supports fuzzy matching). Returns a list of matches with IDs.
+
+**Input:** `"OpenAI"` → returns entity IDs you can pass to **Get Entity**.
+
+### Get Entity
+
+Get the full profile of an entity by its numeric ID (from Search or Search Entities results).
 
 ## Resources
 
