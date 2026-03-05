@@ -1,0 +1,16 @@
+{
+  "node": "n8n-nodes-cala.cala",
+  "nodeVersion": "1.0",
+  "codexVersion": "1.0",
+  "categories": ["AI", "Data & Storage"],
+  "subcategories": {
+    "AI": ["Tools"]
+  },
+  "resources": {
+    "primaryDocumentation": [
+      {
+        "url": "https://docs.cala.ai"
+      }
+    ]
+  }
+}

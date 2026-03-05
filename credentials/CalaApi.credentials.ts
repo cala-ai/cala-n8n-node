@@ -1,5 +1,4 @@
 import {
-	IAuthenticateGeneric,
 	ICredentialTestRequest,
 	ICredentialType,
 	INodeProperties,
@@ -23,20 +22,14 @@ export class CalaApi implements ICredentialType {
 		},
 	];
 
-	authenticate: IAuthenticateGeneric = {
-		type: 'generic',
-		properties: {
-			headers: {
-				'X-API-KEY': '={{$credentials.apiKey}}',
-			},
-		},
-	};
-
 	test: ICredentialTestRequest = {
 		request: {
 			baseURL: 'https://api.cala.ai',
 			url: '/v1/knowledge/search',
 			method: 'POST',
+			headers: {
+				'X-API-KEY': '={{$credentials.apiKey}}',
+			},
 			body: {
 				input: 'test',
 			},

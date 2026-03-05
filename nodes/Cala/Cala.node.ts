@@ -1,7 +1,6 @@
 import {
 	IDataObject,
 	IExecuteFunctions,
-	IHttpRequestMethods,
 	INodeExecutionData,
 	INodeType,
 	INodeTypeDescription,
@@ -152,67 +151,6 @@ export class Cala implements INodeType {
 					show: { resource: ['knowledge'], operation: ['getEntity'] },
 				},
 			},
-
-			// ── Custom API Call ─────────────────────────────────────────────────
-			{
-				displayName: 'HTTP Method',
-				name: 'method',
-				type: 'options',
-				options: [
-					{ name: 'DELETE', value: 'DELETE' },
-					{ name: 'GET', value: 'GET' },
-					{ name: 'PATCH', value: 'PATCH' },
-					{ name: 'POST', value: 'POST' },
-					{ name: 'PUT', value: 'PUT' },
-				],
-				default: 'GET',
-				displayOptions: {
-					show: { operation: ['__CUSTOM_API_CALL__'] },
-				},
-			},
-			{
-				displayName: 'URL',
-				name: 'url',
-				type: 'string',
-				default: '',
-				placeholder: '/v1/knowledge/search',
-				description: 'API path relative to https://api.cala.ai',
-				displayOptions: {
-					show: { operation: ['__CUSTOM_API_CALL__'] },
-				},
-			},
-			{
-				displayName: 'Query Parameters',
-				name: 'qs',
-				type: 'fixedCollection',
-				typeOptions: { multipleValues: true },
-				default: {},
-				options: [
-					{
-						name: 'parameter',
-						displayName: 'Parameter',
-						values: [
-							{ displayName: 'Name', name: 'name', type: 'string', default: '' },
-							{ displayName: 'Value', name: 'value', type: 'string', default: '' },
-						],
-					},
-				],
-				displayOptions: {
-					show: { operation: ['__CUSTOM_API_CALL__'] },
-				},
-			},
-			{
-				displayName: 'Request Body',
-				name: 'body',
-				type: 'json',
-				default: '{}',
-				displayOptions: {
-					show: {
-						operation: ['__CUSTOM_API_CALL__'],
-						method: ['POST', 'PUT', 'PATCH'],
-					},
-				},
-			},
 		],
 	};
 
@@ -229,38 +167,12 @@ export class Cala implements INodeType {
 		}
 
 		const resource = this.getNodeParameter('resource', 0) as string;
-
-		if (resource === '__CUSTOM_API_CALL__') {
-			throw new NodeOperationError(
-				this.getNode(),
-				'To make a custom API call, use the HTTP Request node and select the Cala API credential.',
-			);
-		}
-
 		const operation = this.getNodeParameter('operation', 0) as string;
 
 		for (let i = 0; i < items.length; i++) {
 			let response: unknown;
 
-			if (operation === '__CUSTOM_API_CALL__') {
-				const method = this.getNodeParameter('method', i) as IHttpRequestMethods;
-				const url = this.getNodeParameter('url', i) as string;
-				const qsParams = (this.getNodeParameter('qs.parameter', i, []) as Array<{ name: string; value: string }>);
-				const qs = Object.fromEntries(qsParams.map(({ name, value }) => [name, value]));
-
-				const requestOptions = {
-					method,
-					url: `${BASE_URL}${url}`,
-					headers,
-					json: true,
-					...(Object.keys(qs).length > 0 && { qs }),
-					...(['POST', 'PUT', 'PATCH'].includes(method) && {
-						body: JSON.parse(this.getNodeParameter('body', i, '{}') as string),
-					}),
-				};
-
-				response = await this.helpers.httpRequest(requestOptions);
-			} else if (resource === 'knowledge') {
+			if (resource === 'knowledge') {
 				if (operation === 'search') {
 					const query = this.getNodeParameter('query', i) as string;
 					response = await this.helpers.httpRequest({
