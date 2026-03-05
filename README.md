@@ -75,17 +75,74 @@ Ask a natural language question and get back a researched answer with sources.
 
 Filter entities by attributes using dot-notation syntax.
 
-**Input:** `"startups.location=Spain.funding>10M.funding<=50M"`
+**Input:** `"startups.location=Spain.funding>10M"`
+
+**Output:**
+```json
+{
+  "results": [
+    {
+      "startup": "SeQura",
+      "sector": "Fintech / BNPL",
+      "hq": "Barcelona",
+      "funding_round": "Series D (Nov 2024)",
+      "amount": "~€410M (incl. debt)"
+    },
+    {
+      "startup": "TravelPerk",
+      "sector": "Business Travel SaaS",
+      "hq": "Barcelona",
+      "funding_round": "Series D (Nov 2024)"
+    }
+  ],
+  "entities": [
+    { "id": "df8ea521-f2b1-47f7-9b46-419e179d914b", "name": "SeQura", "entity_type": "Organization" },
+    { "id": "2f0da3c2-4d1d-41f5-b433-82df365c27de", "name": "TravelPerk", "entity_type": "Organization" }
+  ]
+}
+```
 
 ### Search Entities
 
 Find entities by name (supports fuzzy matching). Returns a list of matches with IDs.
 
-**Input:** `"OpenAI"` → returns entity IDs you can pass to **Get Entity**.
+**Input:** `"OpenAI"` with limit `3`
+
+**Output:**
+```json
+{
+  "entities": [
+    { "id": "e5bb591a-d308-4aa5-9672-96046d366cde", "name": "OpenAI", "entity_type": "Organization" },
+    { "id": "7eacce50-c89f-44a8-b8e4-a41f543683f2", "name": "OpenAI Codex", "entity_type": "Product" },
+    { "id": "e849412b-dcee-4df1-9461-a7cbdb9c32c7", "name": "OpenAI, Inc.", "entity_type": "Organization" }
+  ]
+}
+```
 
 ### Get Entity
 
-Get the full profile of an entity by its numeric ID (from Search or Search Entities results).
+Get the full profile of an entity by its ID (from Search or Search Entities results).
+
+**Input:** `"932ba22a-5310-4b21-bbb7-6b91741c8bb3"`
+
+**Output:**
+```json
+{
+  "properties": {
+    "name": {
+      "value": "Hydnum Steel",
+      "sources": [{ "name": "Cala AI", "document": "", "date": "2026-03-05" }]
+    },
+    "registered_address": {
+      "value": "Calle Serrano North 45, Madrid, Spain",
+      "sources": [{ "name": "CB Insights", "document": "https://www.cbinsights.com/company/hydnum-steel", "date": "2026-03-02" }]
+    }
+  },
+  "id": { "value": "932ba22a-5310-4b21-bbb7-6b91741c8bb3", "sources": [] },
+  "relationships": { "outgoing": {}, "incoming": {} },
+  "numerical_observations": []
+}
+```
 
 ## Resources
 
