@@ -158,14 +158,6 @@ export class Cala implements INodeType {
 		const items = this.getInputData();
 		const returnData: INodeExecutionData[] = [];
 
-		const credentials = await this.getCredentials('calaApi');
-		const apiKey = credentials.apiKey as string | undefined;
-
-		const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-		if (apiKey) {
-			headers['X-API-KEY'] = apiKey;
-		}
-
 		const resource = this.getNodeParameter('resource', 0) as string;
 		const operation = this.getNodeParameter('operation', 0) as string;
 
@@ -175,38 +167,34 @@ export class Cala implements INodeType {
 			if (resource === 'knowledge') {
 				if (operation === 'search') {
 					const query = this.getNodeParameter('query', i) as string;
-					response = await this.helpers.httpRequest({
+					response = await this.helpers.httpRequestWithAuthentication.call(this, 'calaApi', {
 						method: 'POST',
 						url: `${BASE_URL}/v1/knowledge/search`,
-						headers,
 						body: { input: query },
 						json: true,
 					});
 				} else if (operation === 'query') {
 					const query = this.getNodeParameter('query', i) as string;
-					response = await this.helpers.httpRequest({
+					response = await this.helpers.httpRequestWithAuthentication.call(this, 'calaApi', {
 						method: 'POST',
 						url: `${BASE_URL}/v1/knowledge/query`,
-						headers,
 						body: { input: query },
 						json: true,
 					});
 				} else if (operation === 'searchEntities') {
 					const name = this.getNodeParameter('name', i) as string;
 					const limit = this.getNodeParameter('limit', i) as number;
-					response = await this.helpers.httpRequest({
+					response = await this.helpers.httpRequestWithAuthentication.call(this, 'calaApi', {
 						method: 'GET',
 						url: `${BASE_URL}/v1/knowledge/entities`,
-						headers,
 						qs: { name, limit },
 						json: true,
 					});
 				} else if (operation === 'getEntity') {
 					const entityId = this.getNodeParameter('entityId', i) as number;
-					response = await this.helpers.httpRequest({
+					response = await this.helpers.httpRequestWithAuthentication.call(this, 'calaApi', {
 						method: 'GET',
 						url: `${BASE_URL}/v1/knowledge/entities/${entityId}`,
-						headers,
 						json: true,
 					});
 				} else {
