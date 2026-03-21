@@ -21,6 +21,20 @@ export class Cala implements INodeType {
 		defaults: {
 			name: 'Cala',
 		},
+		codex: {
+			categories: ['AI'],
+			subcategories: {
+				AI: ['Tools'],
+			},
+			alias: ['cala', 'knowledge', 'search', 'ai', 'rag'],
+			resources: {
+				primaryDocumentation: [
+					{
+						url: 'https://cala.ai',
+					},
+				],
+			},
+		},
 		inputs: ['main'],
 		outputs: ['main'],
 		credentials: [
@@ -145,7 +159,7 @@ export class Cala implements INodeType {
 				name: 'entityId',
 				type: 'number',
 				required: true,
-				default: 0,
+				default: null,
 				description: 'The numeric ID of the entity to retrieve',
 				displayOptions: {
 					show: { resource: ['knowledge'], operation: ['getEntity'] },

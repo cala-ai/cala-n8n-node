@@ -37,6 +37,9 @@ export class CalaApi implements ICredentialType {
 			baseURL: 'https://api.cala.ai',
 			url: '/v1/knowledge/entities',
 			method: 'GET',
+			qs: {
+				name: 'test',
+			},
 		},
 	};
 }
