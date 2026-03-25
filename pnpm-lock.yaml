@@ -9,7 +9,7 @@ importers:
   .:
     dependencies:
       n8n-workflow:
-        specifier: '>=1.0.0'
+        specifier: '*'
         version: 1.120.6
     devDependencies:
       '@eslint/js':
