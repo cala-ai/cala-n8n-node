@@ -12,11 +12,11 @@ describe('Cala Node', () => {
     resource = 'knowledge',
     operation = 'search',
     params = {} as Record<string, unknown>,
-    apiKey = 'test-key',
     response = { content: 'ok' } as Record<string, unknown>,
     itemCount = 1,
-  } = {}): IExecuteFunctions & { helpers: { httpRequest: jest.Mock } } => {
-    const httpRequest = jest.fn(async () => response);
+    continueOnFail = false,
+  } = {}): IExecuteFunctions & { helpers: { httpRequestWithAuthentication: jest.Mock } } => {
+    const httpRequestWithAuthentication = jest.fn(async () => response);
 
     return {
       getInputData: jest.fn(() =>
@@ -28,14 +28,14 @@ describe('Cala Node', () => {
         if (name in params) return params[name];
         throw new Error(`Unexpected parameter: ${name}`);
       }),
-      getCredentials: jest.fn(async () => ({ apiKey })),
       getNode: jest.fn(() => ({ name: 'Cala' })),
-      helpers: { httpRequest },
-    } as unknown as IExecuteFunctions & { helpers: { httpRequest: jest.Mock } };
+      continueOnFail: jest.fn(() => continueOnFail),
+      helpers: { httpRequestWithAuthentication },
+    } as unknown as IExecuteFunctions & { helpers: { httpRequestWithAuthentication: jest.Mock } };
   };
 
   describe('Knowledge › Search', () => {
-    it('calls POST /v1/knowledge/search with correct body and headers', async () => {
+    it('calls POST /v1/knowledge/search with correct body', async () => {
       const context = makeContext({
         operation: 'search',
         params: { query: 'What is Cala?' },
@@ -43,35 +43,21 @@ describe('Cala Node', () => {
 
       const result = await node.execute.call(context);
 
-      expect(context.helpers.httpRequest).toHaveBeenCalledWith({
-        method: 'POST',
-        url: 'https://api.cala.ai/v1/knowledge/search',
-        headers: { 'Content-Type': 'application/json', 'X-API-KEY': 'test-key' },
-        body: { input: 'What is Cala?' },
-        json: true,
-      });
-      expect(result).toEqual([[{ json: { content: 'ok' }, pairedItem: { item: 0 } }]]);
-    });
-
-    it('omits X-API-KEY header when apiKey is empty', async () => {
-      const context = makeContext({
-        operation: 'search',
-        params: { query: 'test' },
-        apiKey: '',
-      });
-
-      await node.execute.call(context);
-
-      expect(context.helpers.httpRequest).toHaveBeenCalledWith(
-        expect.objectContaining({
-          headers: { 'Content-Type': 'application/json' },
-        }),
+      expect(context.helpers.httpRequestWithAuthentication).toHaveBeenCalledWith(
+        'calaApi',
+        {
+          method: 'POST',
+          url: 'https://api.cala.ai/v1/knowledge/search',
+          body: { input: 'What is Cala?' },
+          json: true,
+        },
       );
+      expect(result).toEqual([[{ json: { content: 'ok' }, pairedItem: { item: 0 } }]]);
     });
 
     it('processes multiple items', async () => {
       const queries = ['Query 1', 'Query 2', 'Query 3'];
-      const httpRequest = jest.fn()
+      const httpRequestWithAuthentication = jest.fn()
         .mockResolvedValueOnce({ answer: 'Answer 1' })
         .mockResolvedValueOnce({ answer: 'Answer 2' })
         .mockResolvedValueOnce({ answer: 'Answer 3' });
@@ -84,22 +70,22 @@ describe('Cala Node', () => {
           if (name === 'query') return queries[index];
           throw new Error(`Unexpected parameter: ${name}`);
         }),
-        getCredentials: jest.fn(async () => ({ apiKey: 'key' })),
         getNode: jest.fn(() => ({ name: 'Cala' })),
-        helpers: { httpRequest },
+        continueOnFail: jest.fn(() => false),
+        helpers: { httpRequestWithAuthentication },
       } as unknown as IExecuteFunctions;
 
       const result = await node.execute.call(context);
 
-      expect(httpRequest).toHaveBeenCalledTimes(3);
+      expect(httpRequestWithAuthentication).toHaveBeenCalledTimes(3);
       expect(result[0]).toHaveLength(3);
       expect(result[0][0].json).toEqual({ answer: 'Answer 1' });
       expect(result[0][1].json).toEqual({ answer: 'Answer 2' });
       expect(result[0][2].json).toEqual({ answer: 'Answer 3' });
     });
 
-    it('propagates HTTP errors', async () => {
-      const httpRequest = jest.fn().mockRejectedValue(new Error('API Error: 500'));
+    it('propagates HTTP errors when continueOnFail is false', async () => {
+      const httpRequestWithAuthentication = jest.fn().mockRejectedValue({ message: 'API Error: 500' });
 
       const context = {
         getInputData: jest.fn(() => [{ json: {} }]),
@@ -109,12 +95,34 @@ describe('Cala Node', () => {
           if (name === 'query') return 'test';
           throw new Error(`Unexpected parameter: ${name}`);
         }),
-        getCredentials: jest.fn(async () => ({ apiKey: 'key' })),
         getNode: jest.fn(() => ({ name: 'Cala' })),
-        helpers: { httpRequest },
+        continueOnFail: jest.fn(() => false),
+        helpers: { httpRequestWithAuthentication },
       } as unknown as IExecuteFunctions;
 
-      await expect(node.execute.call(context)).rejects.toThrow('API Error: 500');
+      await expect(node.execute.call(context)).rejects.toThrow();
+    });
+
+    it('returns error item when continueOnFail is true', async () => {
+      const httpRequestWithAuthentication = jest.fn().mockRejectedValue(new Error('API Error: 500'));
+
+      const context = {
+        getInputData: jest.fn(() => [{ json: {} }]),
+        getNodeParameter: jest.fn((name: string) => {
+          if (name === 'resource') return 'knowledge';
+          if (name === 'operation') return 'search';
+          if (name === 'query') return 'test';
+          throw new Error(`Unexpected parameter: ${name}`);
+        }),
+        getNode: jest.fn(() => ({ name: 'Cala' })),
+        continueOnFail: jest.fn(() => true),
+        helpers: { httpRequestWithAuthentication },
+      } as unknown as IExecuteFunctions;
+
+      const result = await node.execute.call(context);
+
+      expect(result[0][0].json).toEqual({ error: 'API Error: 500' });
+      expect(result[0][0].pairedItem).toEqual({ item: 0 });
     });
   });
 
@@ -128,13 +136,15 @@ describe('Cala Node', () => {
 
       await node.execute.call(context);
 
-      expect(context.helpers.httpRequest).toHaveBeenCalledWith({
-        method: 'POST',
-        url: 'https://api.cala.ai/v1/knowledge/query',
-        headers: { 'Content-Type': 'application/json', 'X-API-KEY': 'test-key' },
-        body: { input: 'startups.location=Spain.funding>10M' },
-        json: true,
-      });
+      expect(context.helpers.httpRequestWithAuthentication).toHaveBeenCalledWith(
+        'calaApi',
+        {
+          method: 'POST',
+          url: 'https://api.cala.ai/v1/knowledge/query',
+          body: { input: 'startups.location=Spain.funding>10M' },
+          json: true,
+        },
+      );
     });
   });
 
@@ -148,13 +158,15 @@ describe('Cala Node', () => {
 
       await node.execute.call(context);
 
-      expect(context.helpers.httpRequest).toHaveBeenCalledWith({
-        method: 'GET',
-        url: 'https://api.cala.ai/v1/knowledge/entities',
-        headers: { 'Content-Type': 'application/json', 'X-API-KEY': 'test-key' },
-        qs: { name: 'OpenAI', limit: 5 },
-        json: true,
-      });
+      expect(context.helpers.httpRequestWithAuthentication).toHaveBeenCalledWith(
+        'calaApi',
+        {
+          method: 'GET',
+          url: 'https://api.cala.ai/v1/knowledge/entities',
+          qs: { name: 'OpenAI', limit: 5 },
+          json: true,
+        },
+      );
     });
   });
 
@@ -168,12 +180,14 @@ describe('Cala Node', () => {
 
       await node.execute.call(context);
 
-      expect(context.helpers.httpRequest).toHaveBeenCalledWith({
-        method: 'GET',
-        url: 'https://api.cala.ai/v1/knowledge/entities/42',
-        headers: { 'Content-Type': 'application/json', 'X-API-KEY': 'test-key' },
-        json: true,
-      });
+      expect(context.helpers.httpRequestWithAuthentication).toHaveBeenCalledWith(
+        'calaApi',
+        {
+          method: 'GET',
+          url: 'https://api.cala.ai/v1/knowledge/entities/42',
+          json: true,
+        },
+      );
     });
   });
 });
