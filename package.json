@@ -56,7 +56,7 @@
     "typescript-eslint": "^8.53.1"
   },
   "peerDependencies": {
-    "n8n-workflow": ">=1.0.0"
+    "n8n-workflow": "*"
   },
   "engines": {
     "node": ">=18",

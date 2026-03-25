@@ -4,6 +4,9 @@ import {
 	INodeExecutionData,
 	INodeType,
 	INodeTypeDescription,
+	JsonObject,
+	NodeApiError,
+	NodeConnectionTypes,
 	NodeOperationError,
 } from 'n8n-workflow';
 
@@ -35,8 +38,9 @@ export class Cala implements INodeType {
 				],
 			},
 		},
-		inputs: ['main'],
-		outputs: ['main'],
+		usableAsTool: true,
+		inputs: [NodeConnectionTypes.Main],
+		outputs: [NodeConnectionTypes.Main],
 		credentials: [
 			{
 				name: 'calaApi',
@@ -70,11 +74,10 @@ export class Cala implements INodeType {
 				},
 				options: [
 					{
-						name: 'Search',
-						value: 'search',
-						action: 'Search knowledge',
-						description:
-							'Answer natural language questions with sourced, researched content',
+						name: 'Get Entity',
+						value: 'getEntity',
+						action: 'Get an entity',
+						description: 'Get the full profile of an entity by its numeric ID',
 					},
 					{
 						name: 'Query',
@@ -84,16 +87,17 @@ export class Cala implements INodeType {
 							'Filter entities by attributes using structured dot-notation syntax',
 					},
 					{
+						name: 'Search',
+						value: 'search',
+						action: 'Search knowledge',
+						description:
+							'Answer natural language questions with sourced, researched content',
+					},
+					{
 						name: 'Search Entities',
 						value: 'searchEntities',
 						action: 'Search entities',
 						description: 'Find entities by name with fuzzy matching',
-					},
-					{
-						name: 'Get Entity',
-						value: 'getEntity',
-						action: 'Get an entity',
-						description: 'Get the full profile of an entity by its numeric ID',
 					},
 				],
 				default: 'search',
@@ -176,55 +180,66 @@ export class Cala implements INodeType {
 		const operation = this.getNodeParameter('operation', 0) as string;
 
 		for (let i = 0; i < items.length; i++) {
-			let response: unknown;
+			try {
+				let response: unknown;
 
-			if (resource === 'knowledge') {
-				if (operation === 'search') {
-					const query = this.getNodeParameter('query', i) as string;
-					response = await this.helpers.httpRequestWithAuthentication.call(this, 'calaApi', {
-						method: 'POST',
-						url: `${BASE_URL}/v1/knowledge/search`,
-						body: { input: query },
-						json: true,
-					});
-				} else if (operation === 'query') {
-					const query = this.getNodeParameter('query', i) as string;
-					response = await this.helpers.httpRequestWithAuthentication.call(this, 'calaApi', {
-						method: 'POST',
-						url: `${BASE_URL}/v1/knowledge/query`,
-						body: { input: query },
-						json: true,
-					});
-				} else if (operation === 'searchEntities') {
-					const name = this.getNodeParameter('name', i) as string;
-					const limit = this.getNodeParameter('limit', i) as number;
-					response = await this.helpers.httpRequestWithAuthentication.call(this, 'calaApi', {
-						method: 'GET',
-						url: `${BASE_URL}/v1/knowledge/entities`,
-						qs: { name, limit },
-						json: true,
-					});
-				} else if (operation === 'getEntity') {
-					const entityId = this.getNodeParameter('entityId', i) as number;
-					response = await this.helpers.httpRequestWithAuthentication.call(this, 'calaApi', {
-						method: 'GET',
-						url: `${BASE_URL}/v1/knowledge/entities/${entityId}`,
-						json: true,
-					});
+				if (resource === 'knowledge') {
+					if (operation === 'search') {
+						const query = this.getNodeParameter('query', i) as string;
+						response = await this.helpers.httpRequestWithAuthentication.call(this, 'calaApi', {
+							method: 'POST',
+							url: `${BASE_URL}/v1/knowledge/search`,
+							body: { input: query },
+							json: true,
+						});
+					} else if (operation === 'query') {
+						const query = this.getNodeParameter('query', i) as string;
+						response = await this.helpers.httpRequestWithAuthentication.call(this, 'calaApi', {
+							method: 'POST',
+							url: `${BASE_URL}/v1/knowledge/query`,
+							body: { input: query },
+							json: true,
+						});
+					} else if (operation === 'searchEntities') {
+						const name = this.getNodeParameter('name', i) as string;
+						const limit = this.getNodeParameter('limit', i) as number;
+						response = await this.helpers.httpRequestWithAuthentication.call(this, 'calaApi', {
+							method: 'GET',
+							url: `${BASE_URL}/v1/knowledge/entities`,
+							qs: { name, limit },
+							json: true,
+						});
+					} else if (operation === 'getEntity') {
+						const entityId = this.getNodeParameter('entityId', i) as number;
+						response = await this.helpers.httpRequestWithAuthentication.call(this, 'calaApi', {
+							method: 'GET',
+							url: `${BASE_URL}/v1/knowledge/entities/${entityId}`,
+							json: true,
+						});
+					} else {
+						throw new NodeOperationError(
+							this.getNode(),
+							`Unknown operation: ${operation}`,
+						);
+					}
 				} else {
-					throw new NodeOperationError(
-						this.getNode(),
-						`Unknown operation: ${operation}`,
-					);
+					throw new NodeOperationError(this.getNode(), `Unknown resource: ${resource}`);
 				}
-			} else {
-				throw new NodeOperationError(this.getNode(), `Unknown resource: ${resource}`);
-			}
 
-			returnData.push({
-				json: response as IDataObject,
-				pairedItem: { item: i },
-			});
+				returnData.push({
+					json: response as IDataObject,
+					pairedItem: { item: i },
+				});
+			} catch (error) {
+				if (this.continueOnFail()) {
+					returnData.push({
+						json: { error: (error as Error).message },
+						pairedItem: { item: i },
+					});
+					continue;
+				}
+				throw new NodeApiError(this.getNode(), error as JsonObject);
+			}
 		}
 
 		return [returnData];

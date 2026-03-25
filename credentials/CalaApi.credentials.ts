@@ -9,6 +9,7 @@ export class CalaApi implements ICredentialType {
 	name = 'calaApi';
 	displayName = 'Cala API';
 	documentationUrl = 'https://docs.cala.ai';
+	icon = 'file:cala.svg' as const;
 	properties: INodeProperties[] = [
 		{
 			displayName: 'API Key',
