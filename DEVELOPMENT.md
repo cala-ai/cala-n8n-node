@@ -2,7 +2,7 @@
 
 ## Requirements
 
-- Node.js >= 22
+- Node.js >= 18
 - pnpm >= 10
 
 ## Project Structure
@@ -10,7 +10,8 @@
 ```text
 cala-n8n/
 ├── credentials/
-│   └── CalaApi.credentials.ts   # API credentials definition
+│   ├── CalaApi.credentials.ts   # API credentials definition
+│   └── cala.svg                 # Credential icon
 ├── nodes/
 │   └── Cala/
 │       ├── Cala.node.ts         # Main node logic
