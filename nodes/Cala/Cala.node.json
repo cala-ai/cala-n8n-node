@@ -1,0 +1,14 @@
+{
+  "node": "n8n-nodes-cala.cala",
+  "nodeVersion": "1.0",
+  "codexVersion": "1.0",
+  "categories": ["AI"],
+  "alias": ["cala", "knowledge", "search", "ai", "rag"],
+  "resources": {
+    "primaryDocumentation": [
+      {
+        "url": "https://cala.ai"
+      }
+    ]
+  }
+}

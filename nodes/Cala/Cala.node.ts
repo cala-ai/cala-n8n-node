@@ -24,20 +24,6 @@ export class Cala implements INodeType {
 		defaults: {
 			name: 'Cala',
 		},
-		codex: {
-			categories: ['AI'],
-			subcategories: {
-				AI: ['Tools'],
-			},
-			alias: ['cala', 'knowledge', 'search', 'ai', 'rag'],
-			resources: {
-				primaryDocumentation: [
-					{
-						url: 'https://cala.ai',
-					},
-				],
-			},
-		},
 		usableAsTool: true,
 		inputs: [NodeConnectionTypes.Main],
 		outputs: [NodeConnectionTypes.Main],
