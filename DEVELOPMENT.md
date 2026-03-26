@@ -15,6 +15,7 @@ cala-n8n/
 ├── nodes/
 │   └── Cala/
 │       ├── Cala.node.ts         # Main node logic
+│       ├── Cala.node.json       # Codex metadata (categories, alias, resources)
 │       └── cala.svg             # Node icon
 ├── dist/                        # Compiled output
 ├── Makefile                     # Development commands
