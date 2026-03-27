@@ -2,7 +2,7 @@
   "node": "n8n-nodes-cala.cala",
   "nodeVersion": "1.0",
   "codexVersion": "1.0",
-  "categories": ["AI"],
+  "categories": ["Miscellaneous"],
   "alias": ["cala", "knowledge", "search", "ai", "rag"],
   "resources": {
     "primaryDocumentation": [
