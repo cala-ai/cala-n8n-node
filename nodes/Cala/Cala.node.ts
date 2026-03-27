@@ -62,7 +62,7 @@ export class Cala implements INodeType {
 					{
 						name: 'Get Entity',
 						value: 'getEntity',
-						action: 'Get an entity',
+						action: 'Get knowledge entity',
 						description: 'Get the full profile of an entity by its numeric ID.',
 					},
 					{
@@ -80,7 +80,7 @@ export class Cala implements INodeType {
 					{
 						name: 'Search Entities',
 						value: 'searchEntities',
-						action: 'Search entities',
+						action: 'Search knowledge entities',
 						description: 'Find entities by name with fuzzy matching.',
 					},
 				],
