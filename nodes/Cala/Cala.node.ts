@@ -19,7 +19,7 @@ export class Cala implements INodeType {
 		icon: 'file:cala.svg',
 		group: ['transform'],
 		version: 1,
-		subtitle: '={{$parameter["operation"]}}',
+		subtitle: '={{$parameter["resource"] + ": " + $parameter["operation"]}}',
 		description: 'Search trusted knowledge with Cala AI.',
 		defaults: {
 			name: 'Cala',
@@ -216,7 +216,7 @@ export class Cala implements INodeType {
 			} catch (error) {
 				if (this.continueOnFail()) {
 					returnData.push({
-						json: { error: (error as Error).message },
+						json: { error: new NodeApiError(this.getNode(), error as JsonObject).message },
 						pairedItem: { item: i },
 					});
 					continue;

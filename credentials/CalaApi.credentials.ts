@@ -20,7 +20,7 @@ export class CalaApi implements ICredentialType {
 			},
 			default: '',
 			required: true,
-			description: 'Your Cala API key',
+			description: 'Your Cala API key.',
 		},
 	];
 
