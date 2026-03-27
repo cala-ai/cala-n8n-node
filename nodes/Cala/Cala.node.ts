@@ -20,7 +20,7 @@ export class Cala implements INodeType {
 		group: ['transform'],
 		version: 1,
 		subtitle: '={{$parameter["operation"]}}',
-		description: 'Search trusted knowledge with Cala AI',
+		description: 'Search trusted knowledge with Cala AI.',
 		defaults: {
 			name: 'Cala',
 		},
@@ -63,27 +63,25 @@ export class Cala implements INodeType {
 						name: 'Get Entity',
 						value: 'getEntity',
 						action: 'Get an entity',
-						description: 'Get the full profile of an entity by its numeric ID',
+						description: 'Get the full profile of an entity by its numeric ID.',
 					},
 					{
 						name: 'Query',
 						value: 'query',
 						action: 'Query knowledge',
-						description:
-							'Filter entities by attributes using structured dot-notation syntax',
+						description: 'Filter entities by attributes using structured dot-notation syntax.',
 					},
 					{
 						name: 'Search',
 						value: 'search',
 						action: 'Search knowledge',
-						description:
-							'Answer natural language questions with sourced, researched content',
+						description: 'Answer natural language questions with sourced, researched content.',
 					},
 					{
 						name: 'Search Entities',
 						value: 'searchEntities',
 						action: 'Search entities',
-						description: 'Find entities by name with fuzzy matching',
+						description: 'Find entities by name with fuzzy matching.',
 					},
 				],
 				default: 'search',
@@ -97,7 +95,7 @@ export class Cala implements INodeType {
 				required: true,
 				default: '',
 				placeholder: "e.g. What were Toyota's total sales in 2023?",
-				description: 'Natural language question to search knowledge for',
+				description: 'Natural language question to search knowledge for.',
 				displayOptions: {
 					show: { resource: ['knowledge'], operation: ['search'] },
 				},
@@ -111,8 +109,7 @@ export class Cala implements INodeType {
 				required: true,
 				default: '',
 				placeholder: 'e.g. startups.location=Spain.funding>10M',
-				description:
-					'Structured dot-notation query to filter entities by attributes',
+				description: 'Structured dot-notation query to filter entities by attributes.',
 				displayOptions: {
 					show: { resource: ['knowledge'], operation: ['query'] },
 				},
@@ -126,7 +123,7 @@ export class Cala implements INodeType {
 				required: true,
 				default: '',
 				placeholder: 'e.g. OpenAI',
-				description: 'Entity name to search for (supports fuzzy matching)',
+				description: 'Entity name to search for (supports fuzzy matching).',
 				displayOptions: {
 					show: { resource: ['knowledge'], operation: ['searchEntities'] },
 				},
@@ -136,7 +133,7 @@ export class Cala implements INodeType {
 				name: 'limit',
 				type: 'number',
 				default: 20,
-				description: 'Maximum number of results to return',
+				description: 'Maximum number of results to return.',
 				typeOptions: { minValue: 1, maxValue: 100 },
 				displayOptions: {
 					show: { resource: ['knowledge'], operation: ['searchEntities'] },
@@ -149,8 +146,8 @@ export class Cala implements INodeType {
 				name: 'entityId',
 				type: 'number',
 				required: true,
-				default: null,
-				description: 'The numeric ID of the entity to retrieve',
+				default: 0,
+				description: 'Numeric ID of the entity to retrieve.',
 				displayOptions: {
 					show: { resource: ['knowledge'], operation: ['getEntity'] },
 				},
