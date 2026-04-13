@@ -76,7 +76,7 @@ export class Cala implements INodeType {
 						name: 'Get Entity Fields',
 						value: 'getEntityFields',
 						action: 'Get knowledge entity fields',
-						description: 'Get available properties, relationships, and numerical observations for an entity. Run this before Get Entity to discover what can be queried.',
+						description: 'Get available properties, relationships, and numerical observations for an entity.',
 					},
 					{
 						name: 'Query',
@@ -342,6 +342,7 @@ export class Cala implements INodeType {
 							const outgoing: Record<string, { limit?: number; offset?: number }> = {};
 							const incoming: Record<string, { limit?: number; offset?: number }> = {};
 							for (const item of relationshipItems) {
+								if (!item.relationshipType?.trim()) continue;
 								const rel: { limit?: number; offset?: number } = {};
 								if (item.limit != null) rel.limit = item.limit;
 								if (item.offset != null) rel.offset = item.offset;

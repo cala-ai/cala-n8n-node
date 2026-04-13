@@ -348,6 +348,56 @@ describe('Cala Node', () => {
         },
       );
     });
+
+    it('skips relationship items with empty relationshipType', async () => {
+      const context = makeContext({
+        operation: 'getEntity',
+        params: {
+          entityId: 'c6772802-bdbc-4778-91e9-cd3d27d008d5',
+          additionalFields: {
+            relationships: {
+              items: [
+                { direction: 'outgoing', relationshipType: '' },
+                { direction: 'outgoing', relationshipType: '  ' },
+                { direction: 'outgoing', relationshipType: 'IS_REGISTERED_IN' },
+              ],
+            },
+          },
+        },
+        response: { id: 'c6772802-bdbc-4778-91e9-cd3d27d008d5', name: 'Apple Inc' },
+      });
+
+      await node.execute.call(context);
+
+      expect(context.helpers.httpRequestWithAuthentication).toHaveBeenCalledWith(
+        'calaApi',
+        {
+          method: 'POST',
+          url: 'https://api.cala.ai/v1/entities/c6772802-bdbc-4778-91e9-cd3d27d008d5',
+          body: {
+            relationships: {
+              outgoing: { IS_REGISTERED_IN: {} },
+            },
+          },
+          json: true,
+        },
+      );
+    });
+
+    it('propagates NodeOperationError even when continueOnFail is true', async () => {
+      const context = makeContext({
+        operation: 'getEntity',
+        params: {
+          entityId: 'c6772802-bdbc-4778-91e9-cd3d27d008d5',
+          additionalFields: {
+            numericalObservations: 'not-valid-json',
+          },
+        },
+        continueOnFail: true,
+      });
+
+      await expect(node.execute.call(context)).rejects.toBeInstanceOf(NodeOperationError);
+    });
   });
 
   describe('Knowledge › Get Entity Fields', () => {
