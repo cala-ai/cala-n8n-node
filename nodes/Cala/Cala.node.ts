@@ -286,13 +286,13 @@ export class Cala implements INodeType {
 		const returnData: INodeExecutionData[] = [];
 
 		const resource = this.getNodeParameter('resource', 0) as string;
-		const operation = this.getNodeParameter('operation', 0) as string;
 
 		for (let i = 0; i < items.length; i++) {
 			try {
 				let response: unknown;
 
 				if (resource === 'knowledge') {
+					const operation = this.getNodeParameter('operation', i) as string;
 					if (operation === 'search') {
 						const query = this.getNodeParameter('query', i) as string;
 						response = await this.helpers.httpRequestWithAuthentication.call(this, 'calaApi', {
