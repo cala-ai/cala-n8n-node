@@ -28,14 +28,15 @@ You need a Cala API key to use this node:
 
 ## Operations
 
-The node exposes a **Knowledge** resource with four operations:
+The node exposes a **Knowledge** resource with five operations:
 
 | Operation | Description |
 |-----------|-------------|
 | **Search** | Answer natural language questions with sourced, researched content |
 | **Query** | Filter entities by attributes using structured dot-notation syntax |
-| **Search Entities** | Find entities by name with fuzzy matching |
-| **Get Entity** | Get the full profile of an entity by its numeric ID |
+| **Search Entities** | Find entities by name with fuzzy matching, optionally filtered by type |
+| **Get Entity** | Get the full profile of an entity by its UUID, with optional field selection |
+| **Get Entity Fields** | Discover which properties, relationships, and observations are available for an entity |
 
 ### Search
 
@@ -106,6 +107,11 @@ Filter entities by attributes using dot-notation syntax.
 
 Find entities by name (supports fuzzy matching). Returns a list of matches with IDs.
 
+**Parameters:**
+- `Name` (required) — entity name to search for
+- `Entity Types` (optional) — filter by one or more types: Company, Person, GPE, Country, Organization, and more
+- `Limit` (optional, default 20) — max results, up to 100
+
 **Input:** `"OpenAI"` with limit `3`
 
 **Output:**
@@ -119,27 +125,55 @@ Find entities by name (supports fuzzy matching). Returns a list of matches with 
 }
 ```
 
-### Get Entity
+### Get Entity Fields
 
-Get the full profile of an entity by its ID (from Search or Search Entities results).
+Discover which properties, relationships, and numerical observations are available for a specific entity before querying it. Run this first, then use the results to fill in the **Get Entity** optional fields.
 
-**Input:** `"932ba22a-5310-4b21-bbb7-6b91741c8bb3"`
+**Input:** Entity UUID `"c6772802-bdbc-4778-91e9-cd3d27d008d5"`
 
 **Output:**
 ```json
 {
+  "properties": ["name", "aliases", "legal_name", "employee_count", "founding_date", "headquarters_address"],
+  "relationships": {
+    "outgoing": ["IS_REGISTERED_IN", "HAS_HEADQUARTERS_IN", "OPERATES_IN_INDUSTRY"],
+    "incoming": ["IS_CEO_OF", "IS_CFO_OF", "IS_BOARD_MEMBER_OF", "IS_SUBSIDIARY_OF"]
+  },
+  "numerical_observations": {
+    "FinancialMetric": [
+      { "id": "1d3eae40-0ba8-5baf-9907-6a4823b067bb", "name": "Cash and Cash Equivalents", "unit": "USD" }
+    ]
+  }
+}
+```
+
+### Get Entity
+
+Get the full profile of an entity by its UUID. By default returns a standard set of properties. Use the optional **Additional Fields** to select exactly which properties, relationships, and numerical observations to include — run **Get Entity Fields** first to discover what's available.
+
+**Parameters:**
+- `Entity ID` (required) — UUID from Search Entities, Search, or Query results
+- `Additional Fields > Properties` — list of property names to return (e.g. `name`, `employee_count`, `founding_date`)
+- `Additional Fields > Relationships` — relationships to include, each with direction (Outgoing/Incoming), type name, and optional limit/offset
+- `Additional Fields > Numerical Observations` — JSON object mapping observation type to UUID array (e.g. `{"FinancialMetric": ["uuid1"]}`)
+
+**Input:** Entity UUID `"c6772802-bdbc-4778-91e9-cd3d27d008d5"` with properties `["name", "employee_count"]` and incoming relationship `IS_CEO_OF`
+
+**Output:**
+```json
+{
+  "id": "c6772802-bdbc-4778-91e9-cd3d27d008d5",
+  "name": "Apple Inc",
+  "entity_type": "Company",
   "properties": {
-    "name": {
-      "value": "Hydnum Steel",
-      "sources": [{ "name": "Cala AI", "document": "", "date": "2026-03-05" }]
-    },
-    "registered_address": {
-      "value": "Calle Serrano North 45, Madrid, Spain",
-      "sources": [{ "name": "CB Insights", "document": "https://www.cbinsights.com/company/hydnum-steel", "date": "2026-03-02" }]
+    "name": { "value": "APPLE INC", "sources": [{ "name": "SEC", "date": "2026-02-26" }] },
+    "employee_count": { "value": 164000, "sources": [{ "name": "Macrotrends", "date": "2026-03-01" }] }
+  },
+  "relationships": {
+    "incoming": {
+      "IS_CEO_OF": [{ "id": "...", "name": "Tim Cook", "entity_type": "Person" }]
     }
   },
-  "id": { "value": "932ba22a-5310-4b21-bbb7-6b91741c8bb3", "sources": [] },
-  "relationships": { "outgoing": {}, "incoming": {} },
   "numerical_observations": []
 }
 ```
