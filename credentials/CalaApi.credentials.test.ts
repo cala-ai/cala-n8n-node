@@ -43,7 +43,7 @@ describe('CalaApi Credentials', () => {
   it('should have test request config', () => {
     expect(credentials.test).toBeDefined();
     expect(credentials.test.request.baseURL).toBe('https://api.cala.ai');
-    expect(credentials.test.request.url).toBe('/v1/knowledge/entities');
+    expect(credentials.test.request.url).toBe('/v1/entities');
     expect(credentials.test.request.method).toBe('GET');
   });
 });

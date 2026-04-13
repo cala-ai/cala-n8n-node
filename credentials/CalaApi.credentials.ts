@@ -36,7 +36,7 @@ export class CalaApi implements ICredentialType {
 	test: ICredentialTestRequest = {
 		request: {
 			baseURL: 'https://api.cala.ai',
-			url: '/v1/knowledge/entities',
+			url: '/v1/entities',
 			method: 'GET',
 			qs: {
 				name: 'test',
