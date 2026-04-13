@@ -1,4 +1,5 @@
 import type { IExecuteFunctions } from 'n8n-workflow';
+import { NodeOperationError } from 'n8n-workflow';
 import { Cala } from './Cala.node';
 
 describe('Cala Node', () => {
@@ -312,7 +313,40 @@ describe('Cala Node', () => {
         },
       });
 
-      await expect(node.execute.call(context)).rejects.toThrow();
+      await expect(node.execute.call(context)).rejects.toBeInstanceOf(NodeOperationError);
+    });
+
+    it('only includes directions that have relationship entries', async () => {
+      const context = makeContext({
+        operation: 'getEntity',
+        params: {
+          entityId: 'c6772802-bdbc-4778-91e9-cd3d27d008d5',
+          additionalFields: {
+            relationships: {
+              items: [
+                { direction: 'outgoing', relationshipType: 'IS_REGISTERED_IN' },
+              ],
+            },
+          },
+        },
+        response: { id: 'c6772802-bdbc-4778-91e9-cd3d27d008d5', name: 'Apple Inc' },
+      });
+
+      await node.execute.call(context);
+
+      expect(context.helpers.httpRequestWithAuthentication).toHaveBeenCalledWith(
+        'calaApi',
+        {
+          method: 'POST',
+          url: 'https://api.cala.ai/v1/entities/c6772802-bdbc-4778-91e9-cd3d27d008d5',
+          body: {
+            relationships: {
+              outgoing: { IS_REGISTERED_IN: {} },
+            },
+          },
+          json: true,
+        },
+      );
     });
   });
 });

@@ -11,10 +11,10 @@ import {
 } from 'n8n-workflow';
 
 interface RelationshipItem {
-  direction: 'outgoing' | 'incoming';
-  relationshipType: string;
-  limit?: number;
-  offset?: number;
+	direction: 'outgoing' | 'incoming';
+	relationshipType: string;
+	limit?: number;
+	offset?: number;
 }
 
 const BASE_URL = 'https://api.cala.ai';
@@ -70,7 +70,7 @@ export class Cala implements INodeType {
 						name: 'Get Entity',
 						value: 'getEntity',
 						action: 'Get knowledge entity',
-						description: 'Get the full profile of an entity by its numeric ID.',
+						description: 'Get the full profile of an entity by its UUID.',
 					},
 					{
 						name: 'Query',
@@ -332,15 +332,18 @@ export class Cala implements INodeType {
 
 						const relationshipItems = additionalFields.relationships?.items ?? [];
 						if (relationshipItems.length) {
-							const outgoing: Record<string, Record<string, number>> = {};
-							const incoming: Record<string, Record<string, number>> = {};
+							const outgoing: Record<string, { limit?: number; offset?: number }> = {};
+							const incoming: Record<string, { limit?: number; offset?: number }> = {};
 							for (const item of relationshipItems) {
-								const rel: Record<string, number> = {};
+								const rel: { limit?: number; offset?: number } = {};
 								if (item.limit != null) rel.limit = item.limit;
 								if (item.offset != null) rel.offset = item.offset;
 								(item.direction === 'outgoing' ? outgoing : incoming)[item.relationshipType] = rel;
 							}
-							body.relationships = { outgoing, incoming };
+							const rel: Record<string, unknown> = {};
+							if (Object.keys(outgoing).length) rel.outgoing = outgoing;
+							if (Object.keys(incoming).length) rel.incoming = incoming;
+							body.relationships = rel;
 						}
 
 						if (additionalFields.numericalObservations) {
@@ -376,6 +379,7 @@ export class Cala implements INodeType {
 					pairedItem: { item: i },
 				});
 			} catch (error) {
+				if (error instanceof NodeOperationError) throw error;
 				if (this.continueOnFail()) {
 					returnData.push({
 						json: { error: new NodeApiError(this.getNode(), error as JsonObject).message },
