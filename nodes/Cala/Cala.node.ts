@@ -10,6 +10,13 @@ import {
 	NodeOperationError,
 } from 'n8n-workflow';
 
+interface RelationshipItem {
+  direction: 'outgoing' | 'incoming';
+  relationshipType: string;
+  limit?: number;
+  offset?: number;
+}
+
 const BASE_URL = 'https://api.cala.ai';
 
 export class Cala implements INodeType {
@@ -173,13 +180,96 @@ export class Cala implements INodeType {
 			{
 				displayName: 'Entity ID',
 				name: 'entityId',
-				type: 'number',
+				type: 'string',
 				required: true,
-				default: 0,
-				description: 'Numeric ID of the entity to retrieve.',
+				default: '',
+				placeholder: 'e.g. c6772802-bdbc-4778-91e9-cd3d27d008d5',
+				description: 'UUID of the entity to retrieve.',
 				displayOptions: {
 					show: { resource: ['knowledge'], operation: ['getEntity'] },
 				},
+			},
+			{
+				displayName: 'Additional Fields',
+				name: 'additionalFields',
+				type: 'collection',
+				placeholder: 'Add Field',
+				default: {},
+				displayOptions: {
+					show: { resource: ['knowledge'], operation: ['getEntity'] },
+				},
+				options: [
+					{
+						displayName: 'Properties',
+						name: 'properties',
+						type: 'string',
+						typeOptions: { multipleValues: true },
+						default: [],
+						placeholder: 'e.g. name',
+						description:
+							'List of property names to return (e.g. name, employee_count, founding_date). Run Get Entity Fields first to discover available properties.',
+					},
+					{
+						displayName: 'Relationships',
+						name: 'relationships',
+						type: 'fixedCollection',
+						typeOptions: { multipleValues: true },
+						default: {},
+						description:
+							'Relationships to include in the response. Run Get Entity Fields first to discover available relationship types.',
+						options: [
+							{
+								name: 'items',
+								displayName: 'Relationship',
+								values: [
+									{
+										displayName: 'Direction',
+										name: 'direction',
+										type: 'options',
+										default: 'outgoing',
+										options: [
+											{ name: 'Outgoing', value: 'outgoing' },
+											{ name: 'Incoming', value: 'incoming' },
+										],
+									},
+									{
+										displayName: 'Relationship Type',
+										name: 'relationshipType',
+										type: 'string',
+										default: '',
+										placeholder: 'e.g. IS_CEO_OF',
+										description: 'Relationship type name as returned by Get Entity Fields.',
+									},
+									{
+										displayName: 'Limit',
+										name: 'limit',
+										type: 'number',
+										default: 10,
+										typeOptions: { minValue: 1 },
+										description: 'Maximum number of related entities to return.',
+									},
+									{
+										displayName: 'Offset',
+										name: 'offset',
+										type: 'number',
+										default: 0,
+										typeOptions: { minValue: 0 },
+										description: 'Number of related entities to skip (for pagination).',
+									},
+								],
+							},
+						],
+					},
+					{
+						displayName: 'Numerical Observations',
+						name: 'numericalObservations',
+						type: 'string',
+						default: '',
+						placeholder: '{"FinancialMetric": ["uuid1", "uuid2"]}',
+						description:
+							'JSON object mapping observation type names to arrays of observation UUIDs. Run Get Entity Fields first to discover available types and UUIDs.',
+					},
+				],
 			},
 		],
 	};
@@ -227,10 +317,48 @@ export class Cala implements INodeType {
 							json: true,
 						});
 					} else if (operation === 'getEntity') {
-						const entityId = this.getNodeParameter('entityId', i) as number;
+						const entityId = this.getNodeParameter('entityId', i) as string;
+						const additionalFields = this.getNodeParameter('additionalFields', i) as {
+							properties?: string[];
+							relationships?: { items: RelationshipItem[] };
+							numericalObservations?: string;
+						};
+
+						const body: Record<string, unknown> = {};
+
+						if (additionalFields.properties?.length) {
+							body.properties = additionalFields.properties;
+						}
+
+						const relationshipItems = additionalFields.relationships?.items ?? [];
+						if (relationshipItems.length) {
+							const outgoing: Record<string, Record<string, number>> = {};
+							const incoming: Record<string, Record<string, number>> = {};
+							for (const item of relationshipItems) {
+								const rel: Record<string, number> = {};
+								if (item.limit != null) rel.limit = item.limit;
+								if (item.offset != null) rel.offset = item.offset;
+								(item.direction === 'outgoing' ? outgoing : incoming)[item.relationshipType] = rel;
+							}
+							body.relationships = { outgoing, incoming };
+						}
+
+						if (additionalFields.numericalObservations) {
+							try {
+								body.numerical_observations = JSON.parse(additionalFields.numericalObservations);
+							} catch {
+								throw new NodeOperationError(
+									this.getNode(),
+									'Numerical Observations must be a valid JSON object (e.g. {"FinancialMetric": ["uuid1"]})',
+									{ itemIndex: i },
+								);
+							}
+						}
+
 						response = await this.helpers.httpRequestWithAuthentication.call(this, 'calaApi', {
-							method: 'GET',
-							url: `${BASE_URL}/v1/knowledge/entities/${entityId}`,
+							method: 'POST',
+							url: `${BASE_URL}/v1/entities/${entityId}`,
+							body,
 							json: true,
 						});
 					} else {

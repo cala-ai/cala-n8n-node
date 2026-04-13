@@ -191,11 +191,14 @@ describe('Cala Node', () => {
   });
 
   describe('Knowledge › Get Entity', () => {
-    it('calls GET /v1/knowledge/entities/:id', async () => {
+    it('calls POST /v1/entities/:id with empty body when no additional fields', async () => {
       const context = makeContext({
         operation: 'getEntity',
-        params: { entityId: 42 },
-        response: { id: 42, name: 'OpenAI' },
+        params: {
+          entityId: 'c6772802-bdbc-4778-91e9-cd3d27d008d5',
+          additionalFields: {},
+        },
+        response: { id: 'c6772802-bdbc-4778-91e9-cd3d27d008d5', name: 'Apple Inc' },
       });
 
       await node.execute.call(context);
@@ -203,11 +206,113 @@ describe('Cala Node', () => {
       expect(context.helpers.httpRequestWithAuthentication).toHaveBeenCalledWith(
         'calaApi',
         {
-          method: 'GET',
-          url: 'https://api.cala.ai/v1/knowledge/entities/42',
+          method: 'POST',
+          url: 'https://api.cala.ai/v1/entities/c6772802-bdbc-4778-91e9-cd3d27d008d5',
+          body: {},
           json: true,
         },
       );
+    });
+
+    it('includes properties in body when provided', async () => {
+      const context = makeContext({
+        operation: 'getEntity',
+        params: {
+          entityId: 'c6772802-bdbc-4778-91e9-cd3d27d008d5',
+          additionalFields: {
+            properties: ['name', 'employee_count'],
+          },
+        },
+        response: { id: 'c6772802-bdbc-4778-91e9-cd3d27d008d5', name: 'Apple Inc' },
+      });
+
+      await node.execute.call(context);
+
+      expect(context.helpers.httpRequestWithAuthentication).toHaveBeenCalledWith(
+        'calaApi',
+        {
+          method: 'POST',
+          url: 'https://api.cala.ai/v1/entities/c6772802-bdbc-4778-91e9-cd3d27d008d5',
+          body: { properties: ['name', 'employee_count'] },
+          json: true,
+        },
+      );
+    });
+
+    it('assembles relationships body from fixedCollection items', async () => {
+      const context = makeContext({
+        operation: 'getEntity',
+        params: {
+          entityId: 'c6772802-bdbc-4778-91e9-cd3d27d008d5',
+          additionalFields: {
+            relationships: {
+              items: [
+                { direction: 'incoming', relationshipType: 'IS_CEO_OF', limit: 5, offset: 0 },
+                { direction: 'outgoing', relationshipType: 'IS_REGISTERED_IN' },
+              ],
+            },
+          },
+        },
+        response: { id: 'c6772802-bdbc-4778-91e9-cd3d27d008d5', name: 'Apple Inc' },
+      });
+
+      await node.execute.call(context);
+
+      expect(context.helpers.httpRequestWithAuthentication).toHaveBeenCalledWith(
+        'calaApi',
+        {
+          method: 'POST',
+          url: 'https://api.cala.ai/v1/entities/c6772802-bdbc-4778-91e9-cd3d27d008d5',
+          body: {
+            relationships: {
+              outgoing: { IS_REGISTERED_IN: {} },
+              incoming: { IS_CEO_OF: { limit: 5, offset: 0 } },
+            },
+          },
+          json: true,
+        },
+      );
+    });
+
+    it('parses numericalObservations JSON string into body', async () => {
+      const context = makeContext({
+        operation: 'getEntity',
+        params: {
+          entityId: 'c6772802-bdbc-4778-91e9-cd3d27d008d5',
+          additionalFields: {
+            numericalObservations: '{"FinancialMetric": ["a277a751-96fd-5204-b7bc-2238a7cc4188"]}',
+          },
+        },
+        response: { id: 'c6772802-bdbc-4778-91e9-cd3d27d008d5', name: 'Apple Inc' },
+      });
+
+      await node.execute.call(context);
+
+      expect(context.helpers.httpRequestWithAuthentication).toHaveBeenCalledWith(
+        'calaApi',
+        {
+          method: 'POST',
+          url: 'https://api.cala.ai/v1/entities/c6772802-bdbc-4778-91e9-cd3d27d008d5',
+          body: {
+            numerical_observations: { FinancialMetric: ['a277a751-96fd-5204-b7bc-2238a7cc4188'] },
+          },
+          json: true,
+        },
+      );
+    });
+
+    it('throws NodeOperationError when numericalObservations is invalid JSON', async () => {
+      const context = makeContext({
+        operation: 'getEntity',
+        params: {
+          entityId: 'c6772802-bdbc-4778-91e9-cd3d27d008d5',
+          additionalFields: {
+            numericalObservations: 'not-valid-json',
+          },
+        },
+      });
+
+      await expect(node.execute.call(context)).rejects.toThrow();
     });
   });
 });
