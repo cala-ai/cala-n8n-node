@@ -24,11 +24,12 @@
     "url": "https://github.com/cala-ai/cala-n8n-node/issues"
   },
   "scripts": {
-    "build": "tsc && gulp build:icons",
-    "dev": "tsc --watch",
+    "build": "n8n-node build",
+    "dev": "n8n-node dev",
     "test": "jest",
-    "lint": "eslint nodes credentials",
-    "prepublishOnly": "npm run build"
+    "lint": "n8n-node lint",
+    "release": "n8n-node release",
+    "prepublishOnly": "n8n-node prerelease"
   },
   "files": [
     "dist",
@@ -37,6 +38,7 @@
   ],
   "n8n": {
     "n8nNodesApiVersion": 1,
+    "strict": true,
     "credentials": [
       "dist/credentials/CalaApi.credentials.js"
     ],
@@ -45,16 +47,14 @@
     ]
   },
   "devDependencies": {
-    "@eslint/js": "^9.39.2",
+    "@n8n/node-cli": "^0.23.1",
     "@types/jest": "^30.0.0",
     "@types/node": "^20.10.0",
-    "eslint": "^9.39.2",
-    "gulp": "^5.0.0",
     "jest": "^30.2.0",
     "n8n-workflow": "^2.13.1",
+    "release-it": "^19.2.4",
     "ts-jest": "^29.4.6",
-    "typescript": "^5.3.0",
-    "typescript-eslint": "^8.53.1"
+    "typescript": "^5.3.0"
   },
   "peerDependencies": {
     "n8n-workflow": "*"

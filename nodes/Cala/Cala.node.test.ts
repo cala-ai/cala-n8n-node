@@ -23,7 +23,7 @@ describe('Cala Node', () => {
       getInputData: jest.fn(() =>
         Array.from({ length: itemCount }, (_, i) => ({ json: { index: i } })),
       ),
-      getNodeParameter: jest.fn((name: string, index?: number) => {
+      getNodeParameter: jest.fn((name: string) => {
         if (name === 'resource') return resource;
         if (name === 'operation') return operation;
         if (name in params) return params[name];
