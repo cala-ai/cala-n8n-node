@@ -182,7 +182,7 @@ export class Cala implements INodeType {
 				},
 			},
 
-			// ── Knowledge › Get Entity ──────────────────────────────────────────
+			// ── Knowledge › Get Entity / Get Entity Fields ──────────────────────
 			{
 				displayName: 'Entity ID',
 				name: 'entityId',
@@ -190,9 +190,9 @@ export class Cala implements INodeType {
 				required: true,
 				default: '',
 				placeholder: 'e.g. c6772802-bdbc-4778-91e9-cd3d27d008d5',
-				description: 'UUID of the entity to retrieve.',
+				description: 'UUID of the entity.',
 				displayOptions: {
-					show: { resource: ['knowledge'], operation: ['getEntity'] },
+					show: { resource: ['knowledge'], operation: ['getEntity', 'getEntityFields'] },
 				},
 			},
 			{
@@ -278,19 +278,6 @@ export class Cala implements INodeType {
 				],
 			},
 
-			// ── Knowledge › Get Entity Fields ─────────────────────────────────────
-			{
-				displayName: 'Entity ID',
-				name: 'entityId',
-				type: 'string',
-				required: true,
-				default: '',
-				placeholder: 'e.g. c6772802-bdbc-4778-91e9-cd3d27d008d5',
-				description: 'UUID of the entity to introspect.',
-				displayOptions: {
-					show: { resource: ['knowledge'], operation: ['getEntityFields'] },
-				},
-			},
 		],
 	};
 
