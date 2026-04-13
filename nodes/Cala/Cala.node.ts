@@ -129,6 +129,35 @@ export class Cala implements INodeType {
 				},
 			},
 			{
+				displayName: 'Entity Types',
+				name: 'entity_types',
+				type: 'multiOptions',
+				default: [],
+				description: 'Filter results by entity type. Leave empty to return all types.',
+				options: [
+					{ name: 'Company', value: 'Company' },
+					{ name: 'Corporate Event', value: 'CorporateEvent' },
+					{ name: 'Country', value: 'Country' },
+					{ name: 'Country Region', value: 'CountryRegion' },
+					{ name: 'Educational Institution', value: 'EducationalInstitution' },
+					{ name: 'Entity', value: 'Entity' },
+					{ name: 'Facility', value: 'Facility' },
+					{ name: 'Financial Metric', value: 'FinancialMetric' },
+					{ name: 'GPE', value: 'GPE' },
+					{ name: 'Industry', value: 'Industry' },
+					{ name: 'Language', value: 'Language' },
+					{ name: 'Law', value: 'Law' },
+					{ name: 'Location', value: 'Location' },
+					{ name: 'Organization', value: 'Organization' },
+					{ name: 'Person', value: 'Person' },
+					{ name: 'Product', value: 'Product' },
+					{ name: 'Work of Art', value: 'WorkOfArt' },
+				],
+				displayOptions: {
+					show: { resource: ['knowledge'], operation: ['searchEntities'] },
+				},
+			},
+			{
 				displayName: 'Limit',
 				name: 'limit',
 				type: 'number',
@@ -186,10 +215,15 @@ export class Cala implements INodeType {
 					} else if (operation === 'searchEntities') {
 						const name = this.getNodeParameter('name', i) as string;
 						const limit = this.getNodeParameter('limit', i) as number;
+						const entityTypes = this.getNodeParameter('entity_types', i) as string[];
 						response = await this.helpers.httpRequestWithAuthentication.call(this, 'calaApi', {
 							method: 'GET',
-							url: `${BASE_URL}/v1/knowledge/entities`,
-							qs: { name, limit },
+							url: `${BASE_URL}/v1/entities`,
+							qs: {
+								name,
+								limit,
+								...(entityTypes.length ? { entity_types: entityTypes } : {}),
+							},
 							json: true,
 						});
 					} else if (operation === 'getEntity') {

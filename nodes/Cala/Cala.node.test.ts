@@ -149,10 +149,10 @@ describe('Cala Node', () => {
   });
 
   describe('Knowledge › Search Entities', () => {
-    it('calls GET /v1/knowledge/entities with name and limit', async () => {
+    it('calls GET /v1/entities with name and limit', async () => {
       const context = makeContext({
         operation: 'searchEntities',
-        params: { name: 'OpenAI', limit: 5 },
+        params: { name: 'OpenAI', limit: 5, entity_types: [] },
         response: { entities: [] },
       });
 
@@ -162,8 +162,28 @@ describe('Cala Node', () => {
         'calaApi',
         {
           method: 'GET',
-          url: 'https://api.cala.ai/v1/knowledge/entities',
+          url: 'https://api.cala.ai/v1/entities',
           qs: { name: 'OpenAI', limit: 5 },
+          json: true,
+        },
+      );
+    });
+
+    it('includes entity_types in qs when provided', async () => {
+      const context = makeContext({
+        operation: 'searchEntities',
+        params: { name: 'Apple', limit: 20, entity_types: ['Company', 'Organization'] },
+        response: { entities: [] },
+      });
+
+      await node.execute.call(context);
+
+      expect(context.helpers.httpRequestWithAuthentication).toHaveBeenCalledWith(
+        'calaApi',
+        {
+          method: 'GET',
+          url: 'https://api.cala.ai/v1/entities',
+          qs: { name: 'Apple', limit: 20, entity_types: ['Company', 'Organization'] },
           json: true,
         },
       );
