@@ -349,4 +349,29 @@ describe('Cala Node', () => {
       );
     });
   });
+
+  describe('Knowledge › Get Entity Fields', () => {
+    it('calls GET /v1/entities/:id/introspection', async () => {
+      const context = makeContext({
+        operation: 'getEntityFields',
+        params: { entityId: 'c6772802-bdbc-4778-91e9-cd3d27d008d5' },
+        response: {
+          properties: ['name', 'employee_count'],
+          relationships: { outgoing: ['IS_REGISTERED_IN'], incoming: ['IS_CEO_OF'] },
+          numerical_observations: {},
+        },
+      });
+
+      await node.execute.call(context);
+
+      expect(context.helpers.httpRequestWithAuthentication).toHaveBeenCalledWith(
+        'calaApi',
+        {
+          method: 'GET',
+          url: 'https://api.cala.ai/v1/entities/c6772802-bdbc-4778-91e9-cd3d27d008d5/introspection',
+          json: true,
+        },
+      );
+    });
+  });
 });

@@ -73,6 +73,12 @@ export class Cala implements INodeType {
 						description: 'Get the full profile of an entity by its UUID.',
 					},
 					{
+						name: 'Get Entity Fields',
+						value: 'getEntityFields',
+						action: 'Get knowledge entity fields',
+						description: 'Get available properties, relationships, and numerical observations for an entity. Run this before Get Entity to discover what can be queried.',
+					},
+					{
 						name: 'Query',
 						value: 'query',
 						action: 'Query knowledge',
@@ -271,6 +277,20 @@ export class Cala implements INodeType {
 					},
 				],
 			},
+
+			// ── Knowledge › Get Entity Fields ─────────────────────────────────────
+			{
+				displayName: 'Entity ID',
+				name: 'entityId',
+				type: 'string',
+				required: true,
+				default: '',
+				placeholder: 'e.g. c6772802-bdbc-4778-91e9-cd3d27d008d5',
+				description: 'UUID of the entity to introspect.',
+				displayOptions: {
+					show: { resource: ['knowledge'], operation: ['getEntityFields'] },
+				},
+			},
 		],
 	};
 
@@ -362,6 +382,13 @@ export class Cala implements INodeType {
 							method: 'POST',
 							url: `${BASE_URL}/v1/entities/${entityId}`,
 							body,
+							json: true,
+						});
+					} else if (operation === 'getEntityFields') {
+						const entityId = this.getNodeParameter('entityId', i) as string;
+						response = await this.helpers.httpRequestWithAuthentication.call(this, 'calaApi', {
+							method: 'GET',
+							url: `${BASE_URL}/v1/entities/${entityId}/introspection`,
 							json: true,
 						});
 					} else {
