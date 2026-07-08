@@ -10,3 +10,6 @@ dist/
 
 # Lock files - only use pnpm-lock.yaml
 package-lock.json
+
+# Auto-generated, regenerate via auto-changelog when needed
+CHANGELOG.md

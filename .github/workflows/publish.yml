@@ -30,9 +30,12 @@ jobs:
       - name: Build
         run: pnpm build
 
+      # Trusted publishing (OIDC) needs npm >= 11.5.1; Node 22 ships an older npm.
+      - name: Upgrade npm for trusted publishing
+        run: npm install -g npm@latest
+
       - name: Publish with provenance
+        # No NPM_TOKEN: auth comes from GitHub OIDC via npm trusted publishing.
         # --ignore-scripts skips the local-only `prepublishOnly` guard
         # (`n8n-node prerelease`) that blocks non-interactive `npm publish`.
         run: npm publish --provenance --access public --ignore-scripts
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
