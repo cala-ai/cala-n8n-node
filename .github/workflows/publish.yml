@@ -31,6 +31,8 @@ jobs:
         run: pnpm build
 
       - name: Publish with provenance
-        run: npm publish --provenance --access public
+        # --ignore-scripts skips the local-only `prepublishOnly` guard
+        # (`n8n-node prerelease`) that blocks non-interactive `npm publish`.
+        run: npm publish --provenance --access public --ignore-scripts
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

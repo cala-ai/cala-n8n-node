@@ -23,7 +23,7 @@ export class Cala implements INodeType {
 	description: INodeTypeDescription = {
 		displayName: 'Cala',
 		name: 'cala',
-		icon: 'file:cala.svg',
+		icon: { light: 'file:cala.svg', dark: 'file:cala.dark.svg' },
 		group: ['transform'],
 		version: 1,
 		subtitle: '={{$parameter["resource"] + ": " + $parameter["operation"]}}',
