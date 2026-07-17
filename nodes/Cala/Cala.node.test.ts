@@ -1,5 +1,5 @@
 import type { IExecuteFunctions } from 'n8n-workflow';
-import { NodeOperationError } from 'n8n-workflow';
+import { NodeApiError } from 'n8n-workflow';
 import { Cala } from './Cala.node';
 
 describe('Cala Node', () => {
@@ -302,7 +302,7 @@ describe('Cala Node', () => {
       );
     });
 
-    it('throws NodeOperationError when numericalObservations is invalid JSON', async () => {
+    it('throws when numericalObservations is invalid JSON', async () => {
       const context = makeContext({
         operation: 'getEntity',
         params: {
@@ -313,7 +313,7 @@ describe('Cala Node', () => {
         },
       });
 
-      await expect(node.execute.call(context)).rejects.toBeInstanceOf(NodeOperationError);
+      await expect(node.execute.call(context)).rejects.toBeInstanceOf(NodeApiError);
     });
 
     it('only includes directions that have relationship entries', async () => {
@@ -384,7 +384,7 @@ describe('Cala Node', () => {
       );
     });
 
-    it('propagates NodeOperationError even when continueOnFail is true', async () => {
+    it('returns an error item instead of throwing when continueOnFail is true', async () => {
       const context = makeContext({
         operation: 'getEntity',
         params: {
@@ -396,7 +396,10 @@ describe('Cala Node', () => {
         continueOnFail: true,
       });
 
-      await expect(node.execute.call(context)).rejects.toBeInstanceOf(NodeOperationError);
+      const result = await node.execute.call(context);
+
+      expect(result[0][0].json.error).toContain('valid JSON object');
+      expect(result[0][0].pairedItem).toEqual({ item: 0 });
     });
   });
 

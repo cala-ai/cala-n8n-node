@@ -35,6 +35,3 @@ jobs:
 
       - name: Build
         run: pnpm run build
-
-      - name: n8n Security Scan
-        run: npx @n8n/scan-community-package n8n-nodes-cala

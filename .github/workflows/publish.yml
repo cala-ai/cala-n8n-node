@@ -38,3 +38,21 @@ jobs:
         # --ignore-scripts skips the local-only `prepublishOnly` guard
         # (`n8n-node prerelease`) that blocks non-interactive `npm publish`.
         run: npm publish --provenance --access public --ignore-scripts
+
+      # The marketplace scanner only runs against a published package, so this
+      # is our earliest gate on its rule set. Wait for the new version to
+      # propagate to the registry, then scan it. A failure here means the
+      # marketplace review would also reject this version.
+      - name: Verify published version passes n8n community scan
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          echo "Waiting for n8n-nodes-cala@$VERSION on npm..."
+          for i in $(seq 1 30); do
+            if [ "$(npm view n8n-nodes-cala@"$VERSION" version 2>/dev/null)" = "$VERSION" ]; then
+              echo "Found $VERSION on npm."
+              break
+            fi
+            echo "  not visible yet (attempt $i/30), retrying in 10s..."
+            sleep 10
+          done
+          npx @n8n/scan-community-package@latest n8n-nodes-cala

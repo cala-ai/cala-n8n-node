@@ -383,10 +383,13 @@ export class Cala implements INodeType {
 						throw new NodeOperationError(
 							this.getNode(),
 							`Unknown operation: ${operation}`,
+							{ itemIndex: i },
 						);
 					}
 				} else {
-					throw new NodeOperationError(this.getNode(), `Unknown resource: ${resource}`);
+					throw new NodeOperationError(this.getNode(), `Unknown resource: ${resource}`, {
+						itemIndex: i,
+					});
 				}
 
 				returnData.push({
@@ -394,10 +397,12 @@ export class Cala implements INodeType {
 					pairedItem: { item: i },
 				});
 			} catch (error) {
-				if (error instanceof NodeOperationError) throw error;
 				if (this.continueOnFail()) {
 					returnData.push({
-						json: { error: new NodeApiError(this.getNode(), error as JsonObject).message },
+						json: {
+							error: new NodeApiError(this.getNode(), error as JsonObject, { itemIndex: i })
+								.message,
+						},
 						pairedItem: { item: i },
 					});
 					continue;
